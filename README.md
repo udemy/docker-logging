@@ -34,3 +34,28 @@ Setup:
 
 - this expose the `/dev/log` address to the container
 - I used the bind mount option instead of a volume because the address is not maintained by docker
+
+
+## Example 3 ##
+
+In this example, the application is logging to STDOUT and STDERR.
+Instead of relying on the host machine to provide the rsyslog service, we can created a dedicated logging container. 
+The logging container will expose the listening port and log data to a location that is mounted on the host.
+
+Setup:
+- docker running on the single linux host
+- rsyslog container running on the host
+
+> docker run -d --mount type=bind,source=/tmp/clogs,target=/var/log -p 127.0.0.1:5514:514/udp  --name rsyslog voxxit/rsyslog
+
+- `/tmp/clogs` is a directory on the local host. It is mounted on the container as `/var/log`. Rsyslog writes data to `/var/log/messages`
+- the container listens on port 5514 of the local host and routes to port 514 on internal network
+
+> docker run --log-driver syslog --log-opt syslog-address=udp://127.0.0.1:5514 --log-opt syslog-facility=daemon --log-opt tag=app101 --name=logging-ex3 logging-101:v1 example-1/example_1.py
+
+- specify the logging driver as Syslog
+- specify the networking address of the Rsyslog process
+
+You can run multiple instances of the application and all of them will log to the same rsyslog container. Tail the log to see all the messages.
+
+
