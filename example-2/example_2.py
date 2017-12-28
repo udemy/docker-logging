@@ -19,6 +19,6 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 while True:
-    logger.debug('Logging a debug statement into stderr.')
-    logger.error('Logging an error statement into stderr.')
+    logger.debug('Logging a debug statement into syslog.')
+    logger.error('Logging an error statement into syslog.')
     time.sleep(2)
