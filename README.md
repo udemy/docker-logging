@@ -59,3 +59,16 @@ Setup:
 You can run multiple instances of the application and all of them will log to the same rsyslog container. Tail the log to see all the messages.
 
 
+## Example 4 ##
+
+In this example, the application is logging to Unix syslog just like in Example 2.
+We will also created a dedicated logging container that will run Rsyslog. We will make use of a volume share the `/dev/log` socket address between containers. A volume makes sense in this case becase it is only intended to be visible to docker containers.
+
+Setup:
+- docker running on the single linux host
+- rsyslog container running on the host
+
+
+
+
+
