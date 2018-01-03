@@ -10,7 +10,7 @@ import time
 
 formatter = logging.Formatter('%(asctime)-15s %(name)-12s: %(levelname)-8s %(message)s')
 
-logger = logging.getLogger('to.standard.err')
+logger = logging.getLogger('to.standard.err.example1')
 handler = logging.StreamHandler()   # by default writes to STDERR when stream is None
 handler.setFormatter(formatter)
 logger.addHandler(handler)
