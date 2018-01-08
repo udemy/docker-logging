@@ -1,0 +1,73 @@
+### NOT TESTED YET. JW ###
+## This is the recommneded way to create a logging agent on the node. ##
+
+# This config should be kept as similar as possible to the one at
+# cluster/addons/gci/fluentd-gcp.yaml
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: fluentd-logging
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-logging
+    version: v1
+    #kubernetes.io/cluster-service: "true"
+spec:
+  template:
+    metadata:
+      name: fluentd-logging
+      # If you want different namespace replace it. 
+      namespace: kube-system
+      labels:
+        k8s-app: fluentd-logging
+    spec:
+      dnsPolicy: Default
+      containers:
+      - name: fluentd-logging
+        # For Production use replace image name by an image in your private registry and set imagePullPolicy to reasonable value.
+        image: local/kubernetes-logging:1.19
+        imagePullPolicy: Never
+        # Change for production use. Use the environment variable to the URL of your production host.
+        #env:
+        #  - name: "ELASTICSEARCH_LOGGING_SERVICE_HOST"
+        #    value: "http://elasticsearch-logging:9200"
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log/
+          readOnly: true
+        - name: varlogcontainers
+          mountPath: /var/log/containers
+          readOnly: true
+        - name: varlibdocker
+          mountPath: /var/lib/docker/
+          readOnly: true
+        - name: fluentdposfiles
+          mountPath: /var/lib/fluentd
+        # This mount is minikube specific since /var/log/containers/*.log are symlinks into this mount. 
+        # Probably you will not need it in produktion. Maybe you have to replace it by a mount of /var/lib/docker/containers since normal kubernetes
+        # symlinks into that directory.
+        - name: minikubemount
+          mountPath: /mnt/sda1/var/lib/docker/containers
+          readOnly: true
+        - name: config-volume
+          mountPath: /etc/td-agent
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log/
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      - name: varlibdocker
+        hostPath:
+          path: /var/lib/docker/
+      - name: fluentdposfiles
+        hostPath:
+          path: /tmp/fluentd
+      - name: minikubemount
+        hostPath: 
+          path: /mnt/sda1/var/lib/docker/containers
+      - name: config-volume
+        configMap:
+          name: fluentd-config

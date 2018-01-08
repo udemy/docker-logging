@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: counter-odd
+spec:
+  containers:
+  - name: count-odd
+    image: busybox
+    args: [/bin/sh, -c,
+            'i=1; while true; do echo "$i: $(date)"; i=$((i+2)); sleep 1; done']
+            

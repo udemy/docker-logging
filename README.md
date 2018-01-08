@@ -109,6 +109,30 @@ Setup:
 We can go to /data on the host and find the log files.
 
 
+## Example 6 ##
 
+In this example, we will use Kubernetes. This example is similar to example 1 where there is a single logging agent running on the node.
 
+Setup:
+- kubernetes (minikube)
+- 2 app pods that log to STDOUT
+- a fluentd pod
 
+The two apps are writing to stdout. Kubernetes capture the data and append them to log files. The log files are stored in /var/log/containers. We use fluentd to capture all the logs and output them (stdout in our example) We do this by mounting the volume where the log files are output to, then use the fluentd tail plugin.
+
+`example-6/alpine-sysout` contains the default fluentd.conf file, and the Dockerfile. This is for our custom fluentd docker image. Note: In this example, the fluentd had to be running as root user in order to have permission to access the log directories.
+
+Create configmap which contains my custom configuration for fluentd
+> kubectl create configmap my-fluentd-config --from-file=my_fluentd.conf
+
+Start the apps.
+> kubectl create -f counter-odd-pod.yaml
+> kubectl create -f counter-even-pod.yaml 
+
+Start the logging agent. In this case I am starting it as pod for simplicity. A better approach is to start it as a daemonset.
+
+> kubectl create -f fluentd-agent.yaml
+
+Check that the logging agent is collecting log data from both running apps.
+
+> kubectl logs fluentd-agent-pod
