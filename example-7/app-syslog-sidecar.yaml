@@ -1,0 +1,30 @@
+# This is the config file for a pod that has two containers.
+# The first container is the app and it logs to syslog.
+# The second container is the logging agent. It accepts input data by listening to syslog protocol and output to stdout.
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: app-syslog
+spec:
+    containers:
+    - name: app
+      image: jwinudemy/logging-101:v1
+      args:
+      - example-7/example_7.py
+    - name: fluentd-syslog-agent
+      image: jwinudemy/fluentd-alpine-sysout:v1
+      env:
+      - name: FLUENTD_CONF
+        value: my_fluentd.conf
+      volumeMounts:
+      - name: varlog
+        mountPath: /var/log
+      - name: config-volume
+        mountPath: /fluentd/etc
+    volumes:
+    - name: varlog
+      emptyDir: {}
+    - name: config-volume
+      configMap:
+        name: my-fluentd-syslog-config

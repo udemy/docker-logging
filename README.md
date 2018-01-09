@@ -136,3 +136,23 @@ Start the logging agent. In this case I am starting it as pod for simplicity. A 
 Check that the logging agent is collecting log data from both running apps.
 
 > kubectl logs fluentd-agent-pod
+
+
+## Example 7 ##
+
+In this example, we will use Kubernetes and try out the concept of a sidecar container with logging agent.
+This pattern is needed in the situation where the app container does not log to STDOUT or STDERR. In this case, the logging agent in the sidecar can be configured to read logs based on how the app is logging. In this example 7, the app is logging to syslog, so we create a fluentd agent that listens SYSLOG protocol.
+
+Setup:
+- kubernetes (minikube)
+- a POD with
+	- an app logging to syslog
+	- fluentd listening to syslog protcol and output to stdout (sidecar)
+
+> kubectl create configmap my-fluentd-syslog-config --from-file=example-7/my_fluentd.conf
+
+> kubectl create -f example-7/app-syslog-sidecar.yaml
+
+> kubectl logs app-syslog fluentd-syslog-agent
+
+You should be able to see the logs from the app inside the fluentd-syslog-agent container.
